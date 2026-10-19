@@ -1,0 +1,311 @@
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+    font-family: "Segoe UI", Arial, sans-serif;
+    color: #f8fafc;
+    background:
+        radial-gradient(ellipse at top, #172554 0%, transparent 55%),
+        linear-gradient(135deg, #020617, #0f172a);
+}
+
+.container {
+    width: 100%;
+    max-width: 460px;
+    padding: 32px 24px;
+    text-align: center;
+    background: rgba(15, 23, 42, 0.88);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 24px;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.4);
+    animation: appear 0.6s ease both;
+}
+
+h1 {
+    font-size: clamp(1.8rem, 6vw, 2.5rem);
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin-bottom: 8px;
+    background: linear-gradient(90deg, #60a5fa, #a78bfa);
+    color: transparent;
+    background-clip: text;
+    -webkit-background-clip: text;
+}
+
+.subtitle {
+    color: #94a3b8;
+    margin-bottom: 24px;
+    font-size: 0.95rem;
+}
+
+#status {
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 18px;
+    padding: 12px;
+    color: #bfdbfe;
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(96, 165, 250, 0.2);
+    border-radius: 12px;
+    font-weight: 600;
+}
+
+#board {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin: 0 auto 24px;
+}
+
+.cell {
+    aspect-ratio: 1;
+    border: 1px solid #334155;
+    border-radius: 16px;
+    background: linear-gradient(145deg, #1e293b, #111827);
+    color: #60a5fa;
+    font-size: clamp(2.5rem, 10vw, 3.5rem);
+    font-weight: 800;
+    cursor: pointer;
+    transition:
+        transform 0.18s ease,
+        background 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.cell:not(:disabled):hover {
+    transform: translateY(-3px);
+    border-color: #60a5fa;
+    background: #1e3a5f;
+    box-shadow: 0 8px 22px rgba(59, 130, 246, 0.16);
+}
+
+.cell:disabled {
+    cursor: default;
+}
+
+.cell:active {
+    transform: scale(0.96);
+}
+
+#restart {
+    width: 100%;
+    padding: 14px 20px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(90deg, #2563eb, #7c3aed);
+    color: white;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.2);
+    transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+#restart:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.15);
+}
+
+#restart:active {
+    transform: scale(0.98);
+}
+
+@keyframes appear {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 420px) {
+    .container {
+        padding: 24px 16px;
+    }
+
+    #board {
+        gap: 7px;
+    }
+
+    .cell {
+        border-radius: 12px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Smooth animation when X or O appears */
+.cell {
+    position: relative;
+    overflow: hidden;
+}
+
+.cell:not(:empty) {
+    animation: markAppear 0.25s ease-out;
+}
+
+/* Blue X and purple O */
+.cell:contains("X") {
+    color: #60a5fa;
+}
+
+.cell:contains("O") {
+    color: #c4b5fd;
+}
+
+@keyframes markAppear {
+    0% {
+        transform: scale(0.7);
+        opacity: 0.3;
+    }
+
+    70% {
+        transform: scale(1.12);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Winning squares */
+.cell.winner {
+    background: linear-gradient(135deg, #166534, #14532d);
+    border-color: #4ade80;
+    color: #bbf7d0;
+    box-shadow: 0 0 22px rgba(74, 222, 128, 0.3);
+    animation: winnerPulse 0.7s ease-in-out infinite alternate;
+}
+
+@keyframes winnerPulse {
+    from {
+        box-shadow: 0 0 8px rgba(74, 222, 128, 0.2);
+    }
+
+    to {
+        box-shadow: 0 0 24px rgba(74, 222, 128, 0.6);
+    }
+}
+
+/* Animate each X and O */
+.cell.mark-x,
+.cell.mark-o {
+    animation: markAppear 0.25s ease-out;
+}
+
+.cell.mark-x {
+    color: #60a5fa;
+    text-shadow: 0 0 16px rgba(96, 165, 250, 0.45);
+}
+
+.cell.mark-o {
+    color: #c4b5fd;
+    text-shadow: 0 0 16px rgba(196, 181, 253, 0.45);
+}
+
+@keyframes markAppear {
+    0% {
+        transform: scale(0.65);
+        opacity: 0.3;
+    }
+
+    70% {
+        transform: scale(1.12);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Highlight the three winning cells */
+.cell.winner {
+    background: linear-gradient(135deg, #166534, #14532d);
+    border-color: #4ade80;
+    color: #dcfce7;
+    box-shadow: 0 0 22px rgba(74, 222, 128, 0.35);
+    animation: winnerPulse 0.7s ease-in-out infinite alternate;
+}
+
+@keyframes winnerPulse {
+    from {
+        box-shadow: 0 0 8px rgba(74, 222, 128, 0.2);
+    }
+
+    to {
+        box-shadow: 0 0 24px rgba(74, 222, 128, 0.6);
+    }
+}
+
+/* Scoreboard */
+.scoreboard {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.score-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 7px;
+    padding: 13px 5px;
+    border: 1px solid #334155;
+    border-radius: 13px;
+    background: rgba(30, 41, 59, 0.75);
+    transition: transform 0.2s ease;
+}
+
+.score-card:hover {
+    transform: translateY(-3px);
+}
+
+.score-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.score-value {
+    font-size: 1.7rem;
+    font-weight: 800;
+}
+
+.player-score .score-label,
+.player-score .score-value {
+    color: #60a5fa;
+}
+
+.ai-score .score-label,
+.ai-score .score-value {
+    color: #c4b5fd;
+}
+
+.draw-score .score-label,
+.draw-score .score-value {
+    color: #94a3b8;
+}
