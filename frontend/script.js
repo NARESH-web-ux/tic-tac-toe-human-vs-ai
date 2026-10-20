@@ -1,4 +1,6 @@
 
+const API_URL = "https://tic-tac-toe-human-vs-ai.onrender.com/api/game";
+
 const boardElement = document.getElementById("board");
 const statusElement = document.getElementById("status");
 const restartButton = document.getElementById("restart");
@@ -12,7 +14,7 @@ let gameOver = false;
 let waiting = false;
 let winningCells = [];
 
-// Load saved scores, or start at zero.
+// Load saved scores from the browser.
 function loadScores() {
     try {
         const saved = JSON.parse(
@@ -39,7 +41,7 @@ function loadScores() {
 
 let scores = loadScores();
 
-// Update the scoreboard and save it in the browser.
+// Update and save scores.
 function updateScores() {
     playerScoreElement.textContent = scores.player;
     aiScoreElement.textContent = scores.ai;
@@ -51,11 +53,11 @@ function updateScores() {
             JSON.stringify(scores)
         );
     } catch (error) {
-        console.warn("Could not save scores in this browser.");
+        console.warn("Could not save scores.");
     }
 }
 
-// Find the three cells forming a winning line.
+// Find winning cells.
 function findWinningCells() {
     const lines = [
         [0, 1, 2],
@@ -74,14 +76,17 @@ function findWinningCells() {
             board[a] === board[b] &&
             board[b] === board[c]
         ) {
-            return { mark: board[a], cells: [a, b, c] };
+            return {
+                mark: board[a],
+                cells: [a, b, c]
+            };
         }
     }
 
     return null;
 }
 
-// Count a finished game only once.
+// Record completed game result.
 function recordResult() {
     const result = findWinningCells();
 
@@ -104,13 +109,16 @@ function recordResult() {
     }
 }
 
+// Start a new game using Render backend.
 async function newGame() {
     waiting = true;
     renderBoard();
 
+    statusElement.textContent = "Starting game...";
+
     try {
         const response = await fetch(
-            const API_URL = "https://tic-tac-toe-human-vs-ai.onrender.com/api/game";
+            `${API_URL}/new`
         );
 
         if (!response.ok) {
@@ -124,20 +132,26 @@ async function newGame() {
         winningCells = [];
 
         statusElement.textContent = data.message;
+
     } catch (error) {
+        console.error("New game error:", error);
+
         statusElement.textContent =
-            "Cannot connect to backend! Check that Spring Boot is running.";
+            "Cannot connect to backend. Please try again.";
+
     } finally {
         waiting = false;
         renderBoard();
     }
 }
 
+// Display the Tic-Tac-Toe board.
 function renderBoard() {
     boardElement.innerHTML = "";
 
     for (let i = 0; i < 9; i++) {
         const cell = document.createElement("button");
+
         cell.classList.add("cell");
         cell.setAttribute("aria-label", `Square ${i + 1}`);
 
@@ -158,10 +172,12 @@ function renderBoard() {
             gameOver || waiting || board[i] !== "-";
 
         cell.addEventListener("click", () => makeMove(i));
+
         boardElement.appendChild(cell);
     }
 }
 
+// Send player's move to Render backend.
 async function makeMove(position) {
     if (gameOver || waiting || board[position] !== "-") {
         return;
@@ -170,15 +186,19 @@ async function makeMove(position) {
     waiting = true;
     renderBoard();
 
+    statusElement.textContent = "AI is thinking...";
+
     try {
         const response = await fetch(
-            "http://localhost:8080/api/game/move",
+            `${API_URL}/move`,
             {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ position: position })
+                body: JSON.stringify({
+                    position: position
+                })
             }
         );
 
@@ -190,9 +210,9 @@ async function makeMove(position) {
 
         board = data.board;
         gameOver = data.gameOver;
+
         statusElement.textContent = data.message;
 
-        // Record the result only when a game ends.
         if (gameOver) {
             recordResult();
         } else {
@@ -202,16 +222,22 @@ async function makeMove(position) {
                 winningCells = result.cells;
             }
         }
+
     } catch (error) {
+        console.error("Move error:", error);
+
         statusElement.textContent =
-            "Move failed. Check that the backend is running.";
+            "Move failed. Please try again.";
+
     } finally {
         waiting = false;
         renderBoard();
     }
 }
 
+// Restart game button.
 restartButton.addEventListener("click", newGame);
 
+// Initialize game.
 updateScores();
 newGame();
