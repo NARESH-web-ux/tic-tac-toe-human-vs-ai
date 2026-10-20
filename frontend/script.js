@@ -110,7 +110,7 @@ async function newGame() {
 
     try {
         const response = await fetch(
-            "http://localhost:8080/api/game/new"
+            const API_URL = "https://tic-tac-toe-human-vs-ai.onrender.com/api/game";
         );
 
         if (!response.ok) {
